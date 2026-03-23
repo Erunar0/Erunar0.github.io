@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Picker: Color Picker & Palette</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #080808;
+  --surface: #111111;
+  --border: rgba(255,255,255,0.08);
+  --text: #f5f5f5;
+  --muted: #777;
+  --orange: #E85500;
+  --orange-light: #F5A000;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+a { text-decoration: none; color: inherit; }
+
+/* HERO */
+.hero { position: relative; min-height: 100vh; }
+.hero-img { width: 100%; height: 100vh; object-fit: cover; object-position: center top; display: block; }
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(8,8,8,0.05) 0%, rgba(8,8,8,0) 30%, rgba(8,8,8,0.6) 75%, rgba(8,8,8,1) 100%); }
+.hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 60px 5%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+.hero-content h1 { font-family: 'Syne', sans-serif; font-size: clamp(56px, 10vw, 110px); font-weight: 800; letter-spacing: -4px; line-height: 0.9; }
+.hero-content p { font-size: clamp(15px, 1.5vw, 18px); color: rgba(255,255,255,0.55); max-width: 440px; line-height: 1.65; }
+
+.btn-download { display: inline-flex; align-items: center; gap: 12px; background: #fff; color: #080808; font-weight: 600; font-size: 16px; padding: 16px 32px; border-radius: 100px; transition: transform 0.2s, box-shadow 0.2s; margin-top: 12px; }
+.btn-download:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(255,255,255,0.18); }
+
+/* SCREENSHOTS */
+.screenshots-section { padding: 100px 5%; }
+.section-tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--orange-light); margin-bottom: 16px; }
+.section-title { font-family: 'Syne', sans-serif; font-size: clamp(36px, 5vw, 60px); font-weight: 800; letter-spacing: -2px; line-height: 1.0; margin-bottom: 12px; }
+.section-sub { font-size: 16px; color: var(--muted); line-height: 1.65; max-width: 480px; }
+
+.screenshots-header { text-align: center; margin-bottom: 60px; }
+.screenshots-header .section-sub { margin: 0 auto; }
+
+.screenshots-track { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
+.screenshots-track::-webkit-scrollbar { display: none; }
+.ss-card { flex-shrink: 0; width: 190px; border-radius: 28px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; }
+.ss-card:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 30px 60px rgba(0,0,0,0.7); }
+.ss-card img { width: 100%; display: block; }
+
+/* FEATURES */
+.features-section { display: flex; flex-direction: column; gap: 100px; padding: 80px 5%; max-width: 1200px; margin: 0 auto; }
+
+.feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.feature-row.reverse .feature-visual { order: -1; }
+
+.feature-stats { display: flex; gap: 16px; margin-top: 36px; flex-wrap: wrap; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 22px; }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--orange-light); line-height: 1; }
+.stat-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+.feature-visual { display: flex; justify-content: center; }
+.phone-wrap { position: relative; }
+.phone-glow { position: absolute; inset: -60px; border-radius: 50%; pointer-events: none; }
+.phone-frame { width: 270px; border-radius: 40px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 40px 80px rgba(0,0,0,0.7); position: relative; z-index: 1; }
+.phone-frame img { width: 100%; display: block; }
+
+/* CTA */
+.cta-section { text-align: center; padding: 100px 5%; background: var(--surface); border-top: 1px solid var(--border); }
+.cta-section .section-sub { margin: 12px auto 40px; }
+
+/* FOOTER */
+footer { padding: 36px 5%; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; flex-wrap: wrap; gap: 12px; }
+.footer-logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; }
+.footer-logo span { color: var(--orange); }
+
+/* ANIMATIONS */
+.fade-up { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 900px) {
+  .feature-row { grid-template-columns: 1fr; gap: 40px; }
+  .feature-row.reverse .feature-visual { order: 0; }
+  .phone-frame { width: 240px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <img class="hero-img" src="feature_final.png" alt="Picker App">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Picker<span style="color:var(--orange)">.</span></h1>
+    <p>Fotoğraflardan renk çıkar, uyum oluştur, paletleri kaydet. Tasarımcılar için yapıldı.</p>
+    <a href="https://play.google.com/store/apps/details?id=io.github.erunar0.twa" class="btn-download" target="_blank">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.2l13.43-11.96-3.18-3.18L3.18 23.76zm17.3-12.03-3.24-1.85-3.57 3.18 3.57 3.18 3.27-1.87c.93-.53.93-1.94-.03-2.64zM3 .5C2.55.25 2.02.28 1.62.58L14.44 13.4l3.18-3.18L3 .5zm11.44 12.9L3 24c.4.3.93.33 1.38.08l.04-.02 12.62-7.22-3.6-3.44z"/></svg>
+      Google Play'den İndir
+    </a>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="screenshots-section fade-up">
+  <div class="screenshots-header">
+    <div class="section-tag">Ekran Görüntüleri</div>
+    <h2 class="section-title">Her şey bir uygulamada</h2>
+    <p class="section-sub">Renk dünyasını keşfetmek için ihtiyacın olan tüm araçlar, tek yerde.</p>
+  </div>
+  <div class="screenshots-track">
+    <div class="ss-card"><img src="picker_extract_screenshot.png" alt="Extract"></div>
+    <div class="ss-card"><img src="picker_harmony_screenshot.png" alt="Harmony"></div>
+    <div class="ss-card"><img src="picker_mood_screenshot.png" alt="Mood"></div>
+    <div class="ss-card"><img src="picker_search_screenshot.png" alt="Search"></div>
+    <div class="ss-card"><img src="picker_saved_screenshot.png" alt="Saved"></div>
+    <div class="ss-card"><img src="picker_codes_screenshot.png" alt="Codes"></div>
+    <div class="ss-card"><img src="picker_pixelart_screenshot.png" alt="Pixel Art"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div class="features-section">
+
+  <div class="feature-row fade-up">
+    <div class="feature-text">
+      <div class="section-tag">Fotoğraftan Renk</div>
+      <h2 class="section-title">Dokun.<br>Çıkar.<br>Bitti.</h2>
+      <p class="section-sub">Herhangi bir fotoğrafa dokun, renklerini anında çıkar. HEX, RGB, HSL, CMYK formatlarında kopyala.</p>
+      <div class="feature-stats">
+        <div class="stat"><div class="stat-num">8+</div><div class="stat-label">Format</div></div>
+        <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Palet</div></div>
+      </div>
+    </div>
+    <div class="feature-visual">
+      <div class="phone-wrap">
+        <div class="phone-glow" style="background:radial-gradient(ellipse,rgba(232,85,0,0.18) 0%,transparent 70%)"></div>
+        <div class="phone-frame"><img src="picker_extract_screenshot.png" alt="Extract"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-row reverse fade-up">
+    <div class="feature-text">
+      <div class="section-tag">Renk Uyumu</div>
+      <h2 class="section-title">Mükemmel<br>Uyumlar</h2>
+      <p class="section-sub">Analogous, Complementary, Triadic — 6 farklı uyum türüyle anında renk şemaları oluştur ve dışa aktar.</p>
+      <div class="feature-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-label">Uyum Türü</div></div>
+        <div class="stat"><div class="stat-num">1</div><div class="stat-label">Dokunuş</div></div>
+      </div>
+    </div>
+    <div class="feature-visual">
+      <div class="phone-wrap">
+        <div class="phone-glow" style="background:radial-gradient(ellipse,rgba(245,160,0,0.15) 0%,transparent 70%)"></div>
+        <div class="phone-frame"><img src="picker_harmony_screenshot.png" alt="Harmony"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-row fade-up">
+    <div class="feature-text">
+      <div class="section-tag">Mood Paletleri</div>
+      <h2 class="section-title">Hisset.<br>Keşfet.</h2>
+      <p class="section-sub">100'den fazla mood paletini keşfet. Her ruh haline uygun renk kombinasyonları hazır seni bekliyor.</p>
+      <div class="feature-stats">
+        <div class="stat"><div class="stat-num">100+</div><div class="stat-label">Mood</div></div>
+        <div class="stat"><div class="stat-num">5</div><div class="stat-label">Kategori</div></div>
+      </div>
+    </div>
+    <div class="feature-visual">
+      <div class="phone-wrap">
+        <div class="phone-glow" style="background:radial-gradient(ellipse,rgba(220,20,60,0.15) 0%,transparent 70%)"></div>
+        <div class="phone-frame"><img src="picker_mood_screenshot.png" alt="Mood"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-row reverse fade-up">
+    <div class="feature-text">
+      <div class="section-tag">Renk Arama</div>
+      <h2 class="section-title">İstediğin<br>Rengi Bul</h2>
+      <p class="section-sub">İsimle ya da HEX koduyla ara. 10.000'den fazla renk arasında anında sonuç al, bir dokunuşla kopyala.</p>
+      <div class="feature-stats">
+        <div class="stat"><div class="stat-num">10K+</div><div class="stat-label">Renk</div></div>
+        <div class="stat"><div class="stat-num">4</div><div class="stat-label">Format</div></div>
+      </div>
+    </div>
+    <div class="feature-visual">
+      <div class="phone-wrap">
+        <div class="phone-glow" style="background:radial-gradient(ellipse,rgba(0,105,148,0.2) 0%,transparent 70%)"></div>
+        <div class="phone-frame"><img src="picker_search_screenshot.png" alt="Search"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-row fade-up">
+    <div class="feature-text">
+      <div class="section-tag">Tüm Kodlar</div>
+      <h2 class="section-title">Tek Tap.<br>Tüm<br>Formatlar.</h2>
+      <p class="section-sub">HEX, RGB, HSL, CMYK, CSS — tüm renk formatlarını tek dokunuşla kopyala. Geliştiriciler için ideal.</p>
+      <div class="feature-stats">
+        <div class="stat"><div class="stat-num">6</div><div class="stat-label">Format</div></div>
+        <div class="stat"><div class="stat-num">1 TAP</div><div class="stat-label">Copy</div></div>
+      </div>
+    </div>
+    <div class="feature-visual">
+      <div class="phone-wrap">
+        <div class="phone-glow" style="background:radial-gradient(ellipse,rgba(123,63,196,0.2) 0%,transparent 70%)"></div>
+        <div class="phone-frame"><img src="picker_codes_screenshot.png" alt="Codes"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-row reverse fade-up">
+    <div class="feature-text">
+      <div class="section-tag">Pixel Art</div>
+      <h2 class="section-title">Renklerinle<br>Çiz.</h2>
+      <p class="section-sub">Dahili pixel art editörüyle kendi renklerinle 16×16 canvas üzerinde çiz, PNG olarak dışa aktar.</p>
+      <div class="feature-stats">
+        <div class="stat"><div class="stat-num">16²</div><div class="stat-label">Canvas</div></div>
+        <div class="stat"><div class="stat-num">PNG</div><div class="stat-label">Export</div></div>
+      </div>
+    </div>
+    <div class="feature-visual">
+      <div class="phone-wrap">
+        <div class="phone-glow" style="background:radial-gradient(ellipse,rgba(232,133,0,0.15) 0%,transparent 70%)"></div>
+        <div class="phone-frame"><img src="picker_pixelart_screenshot.png" alt="Pixel Art"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CTA -->
+<section class="cta-section fade-up">
+  <div class="section-tag">Ücretsiz</div>
+  <h2 class="section-title">Renk dünyasına<br>giriş yap<span style="color:var(--orange)">.</span></h2>
+  <p class="section-sub">Hemen indir, ücretsiz kullan.</p>
+  <a href="https://play.google.com/store/apps/details?id=io.github.erunar0.twa" class="btn-download" target="_blank">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.2l13.43-11.96-3.18-3.18L3.18 23.76zm17.3-12.03-3.24-1.85-3.57 3.18 3.57 3.18 3.27-1.87c.93-.53.93-1.94-.03-2.64zM3 .5C2.55.25 2.02.28 1.62.58L14.44 13.4l3.18-3.18L3 .5zm11.44 12.9L3 24c.4.3.93.33 1.38.08l.04-.02 12.62-7.22-3.6-3.44z"/></svg>
+    Google Play'den İndir
+  </a>
+</section>
+
+<footer>
+  <div class="footer-logo">picker<span>.</span></div>
+  <span>© 2025 Erunar</span>
+  <span>pickerbusinessapp@gmail.com</span>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => { if (el.isIntersecting) el.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
